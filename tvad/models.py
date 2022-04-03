@@ -31,10 +31,12 @@ class Advertisement(models.Model):
     """
     name = models.CharField(max_length=100, verbose_name='Название')
     description = models.CharField(max_length=150, verbose_name='Краткое описание')
-    duration = models.IntegerField(verbose_name='Продолжительность')
-    broadcast_name = models.CharField(max_length=150, verbose_name='Прередача')
+    duration = models.FloatField(verbose_name='Продолжительность')
+    day_week = models.IntegerField(verbose_name='День недели')
     customer = models.ForeignKey(Customer, on_delete=models.DO_NOTHING, verbose_name='Заказчик')
     status = models.ForeignKey(Status, on_delete=models.DO_NOTHING, verbose_name='Статус рекламы')
+    # broadcast = models.ManyToOneRel(Broadcast, on_delete=models.DO_NOTHING)
+    # broadcast = models.ManyToManyField(Broadcast, verbose_name='Рекомендуемая передача')
 
     def __str__(self):
         return self.name
@@ -59,5 +61,8 @@ class Rating(models.Model):
     Рейтинг программ
     """
     broadcast = models.ForeignKey(Broadcast, on_delete=models.DO_NOTHING, verbose_name='Передача')
-    raring = models.FloatField(blank=True, verbose_name='Стоимость')
+    rating = models.FloatField(blank=True, verbose_name='Рейтинг')
     data = models.DateTimeField(blank=True)
+    # advertisement = models.ForeignKey(Advertisement, on_delete=models.DO_NOTHING, verbose_name='Реклама')
+    # advertisement2 = models.ForeignKey(Advertisement, on_delete=models.DO_NOTHING, verbose_name='Реклама')
+    # advertisement3 = models.ForeignKey(Advertisement, on_delete=models.DO_NOTHING, verbose_name='Реклама')
