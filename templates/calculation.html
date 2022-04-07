@@ -1,0 +1,271 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ title }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="{% static 'todo/main.css' %}"/>
+</head>
+<div class="shapka text-center">
+    <h3><a href="{% url 'index' %}">Реклама77</a></h3>
+    <a href="{% url 'customer' %}">Клиенты</a>
+    <a href="{% url 'advertisement' %}">Реклама</a>
+    <a href="{% url 'broadcast' %}">Передачи</a>
+    <a href="{% url 'rating' %}">Рейтинг</a>
+    <a href="{% url 'calculation' %}">Расчёт</a>
+</div>
+<body class="text-center">
+<h1>Расчёт</h1>
+<div class="text-center">
+    <div class="cont">
+        <div class="forma">
+            <h3>Добавить клиента</h3>
+            <form class="form-create" method="post" action="{% url 'create_customer' %}" value="" enctype="multipart/form-data">
+            {% csrf_token %}
+            <label class="mb-2">Имя/Наименование</label>
+            <div class="mb-3">
+                <input type="text" name="name" id="name" placeholder="Введите ФИ или наименование">
+            </div>
+            <label class="mb-2">Номер договора</label>
+            <div class="mb-3">
+                <input type="text" name="number" id="number" placeholder="Номер договора">
+            </div>
+                <label class="mb-2">Банковские реквизиты</label>
+            <div class="mb-3">
+                <input type="text" name="bank_details" id="bank_details" placeholder="Банковские реквизиты">
+            </div>
+            <label class="mb-2">Контактное лицо</label>
+            <div class="mb-3">
+                <input type="text" name="cont" id="cont" placeholder="Контактное лицо">
+            </div>
+            <label class="mb-2">Телефон</label>
+            <div class="mb-3">
+                <input type="text" name="tel" id="tel" placeholder="Телефон">
+            </div>
+            <label class="mb-2">Кошелек</label>
+            <div class="mb-3">
+                <input type="text" name="money" id="money" placeholder="Кошелек">
+            </div>
+            <div class="text-center">
+                <button type="submit" class="main_button" id="btncreate">Добавить клиента</button>
+                <input type="hidden" name="next" value="{{ next }}" />
+            </div>
+            </form>
+            <br>
+        </div>
+    <div class="forma">
+        <h3>Добавить рекламу</h3>
+            <form class="form-create" method="post" action="{% url 'create_advertisement' %}" value="" enctype="multipart/form-data" style="margin: auto">
+            {% csrf_token %}
+                <label class="mb-2">Наименование</label>
+                <div class="mb-3">
+                    <input type="text" name="name" id="name" placeholder="Введите название">
+                </div>
+                <label class="mb-2">Описание</label>
+                <div class="mb-3">
+                    <input type="text" name="desc" id="desc" placeholder="Введите название">
+                </div>
+                <label class="mb-2">Продолжительность</label>
+                <div class="mb-3">
+                    <input type="text" name="dur" id="dur" placeholder="Введите название">
+                </div>
+                    <label class="mb-2">Дни недели</label>
+                <div class="mb-3">
+                    <input type="text" name="day_week" id="day_week" placeholder="Введите дни">
+                </div>
+                <label class="mb-2">Количество повторов</label>
+                <div class="mb-3">
+                    <input type="text" name="number_repetitions_r" id="number_repetitions_r" placeholder="Введите количество">
+                </div>
+                <label class="mb-2">Стоимость за одну передачу</label>
+                <div class="mb-3">
+                    <input type="text" name="cost_r" id="cost_r" placeholder="Стоимость">
+                </div>
+                <label class="mb-2">Заказчик</label>
+                <div class="mb-3">
+                    <select class="form-control" id="customer" name="selected_customer" style="width: 200px;margin: auto">
+                        {% for tvad in customer_all %}
+                            <option value="{{ tvad.id }}">{{ tvad.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="text-center">
+        {#            <input type="`text`" name="id_post" id="id_post" value="{{ user.id }}" disable hidden>#}
+        {#            <input type="`email`" name="email" id="email" value="{{ user.email }}" disable hidden>#}
+                    <input type="`text`" name="status" id="status" value="{{ 2 }}" disable hidden>
+        {#            <input type="`text`" name="achievement" id="achievement" value="{{ 'Молодец! Ты помог природе! Ей стало полегче' }}" disable hidden>#}
+                        <button type="submit" class="main_button" id="btncreate">Добавить рекламу</button>
+                        <input type="hidden" name="next" value="{{ next }}" />
+                </div>
+            </form>
+    </div>
+        <div class="forma">
+            <h3>Расчитать стоимость</h3>
+            <form class="form-create" method="post" action="{% url 'calculate_cost' %}" value="" enctype="multipart/form-data">
+            {% csrf_token %}
+            <label class="mb-2">Передача расчета количества</label>
+                <select class="form-control" id="broadcast" name="selected_broadcast" style="width: 200px;margin: auto">
+                    {% for tvad in broadcast_all %}
+                        <option value="{{ tvad.duration }}">{{ tvad.name }} {{ tvad.duration }} минут</option>
+                        <option value="{{ tvad.id }}d">{{ tvad.name }} {{ tvad.duration }} минут</option>
+                        {{ p }} == {{ tvad.id }}
+                    {% endfor %}
+                </select>
+            <label class="mb-2">Время рекламы (сек)</label>
+            <div class="mb-3">
+                <input type="text" name="duration" id="duration" placeholder="Продолжительность (сек)">
+            </div>
+            <label class="mb-2">Количество повторов</label>
+            <div class="mb-3">
+                <input type="text" name="number_repetitions" id="number_repetitions" placeholder="Количество повторов" value="">
+            </div>
+            <label class="mb-2">Стоимость за одну передачу</label>
+            <div class="mb-3">
+                <input type="text" name="cost" id="cost" placeholder="Стоимость" value="">
+            </div>
+            <div class="text-center">
+{#                <input type="`text`" name="id" id="id" value="{{ p }}" disable hidden>#}
+                <button type="submit" class="main_button" id="btncreate">Расчитать</button>
+                <input type="hidden" name="next" value="{{ next }}" />
+            </div>
+            </form>
+            <br>
+            <div class="row" style="justify-content: center">
+        {% for massage in messages %}
+            <ul class="{{ massage.tags }}">
+                {% if 'saveCU_с' in massage.tags %}{{ massage|safe }}{% else %}{{ massage }}{% endif %}
+            </ul>
+        {% endfor %}
+    </div>
+        </div>
+            <div class="forma">
+            <h3>Стоимость</h3>
+            <form class="form-create" method="post" action="{% url 'clear_session' %}" value="" enctype="multipart/form-data">
+            {% csrf_token %}
+            <label class="mb-2">Название</label>
+            <div class="mb-3">
+                <input type="text" readonly name="number_repetitions" id="number_repetitions" placeholder="Название" value="{% for tvad in name_broadcast  %} {{ tvad }}{% endfor %}">
+            </div>
+            <label class="mb-2">Время рекламы</label>
+            <div class="mb-3">
+                <input type="text" readonly name="number_repetitions" id="number_repetitions" placeholder="Время рекламы" value="{% for tvad in time_adv  %} {{ tvad }}{% endfor %}">
+            </div>
+            <label class="mb-2">Время передачи</label>
+            <div class="mb-3">
+                <input type="text" readonly name="number_repetitions" id="number_repetitions" placeholder="Время передачи" value="{% for tvad in time_br  %} {{ tvad }}{% endfor %}">
+            </div>
+            <label class="mb-2">Количество повторов</label>
+            <div class="mb-3">
+                <input type="text" readonly name="number_repetitions" id="number_repetitions" placeholder="Количество повторов" value="{% for tvad in number_repetitions  %} {{ tvad }}{% endfor %}">
+            </div>
+            <label class="mb-2">Рейтинг</label>
+            <div class="mb-3">
+                <input type="text" readonly name="number_repetitions" id="number_repetitions" placeholder="Рейтинг" value="{% for tvad in rating  %} {{ tvad }}{% endfor %}">
+            </div>
+            <label class="mb-2">Стоимость за одну передачу</label>
+            <div class="mb-3">
+                <input type="text" readonly name="number_repetitions" id="number_repetitions" placeholder="Стоимость за одну передачу" value="{% for tvad in cost  %} {{ tvad }}{% endfor %}">
+            </div>
+            <label class="mb-2">Итоговая стоимость</label>
+            <div class="mb-3">
+                <input type="text" readonly name="number_repetitions" id="number_repetitions" placeholder="Итоговая стоимость" value="{% for tvad in cost  %} {{ tvad }}{% endfor %}">
+            </div>
+            <div class="text-center">
+{#                <input type="`text`" name="id" id="id" value="{{ p }}" disable hidden>#}
+                <button type="submit" class="main_button" id="btncreate">Очистить</button>
+                <input type="hidden" name="next" value="{{ next }}" />
+            </div>
+            </form>
+            <br>
+        </div>
+    <div class="info mb-3">
+        <h3>Информация</h3>
+            <p>Данная страница "Расчёт" содержит формы для добавления: <br>
+                нового клиента, новой передачи, добавления данных для расчёта,<br>
+                которые отобразяться в форме "Стоимость"<br>
+                 В форме добавления нового клиента есть ограничения на:
+                <ul class="" style="list-style-type: disc">
+                    <li>отправку пустой формы</li>
+                    <li>добавление клиента с существующим именем в систему</li>
+                    <li>добавление банковских реквизитов нечислового формата</li>
+                    <li>добавление номера телефона прикрепленного к пользователю </li>
+                    <li>добавление номера телефона неверного формата </li>
+                    <li>добавление суммы кошелька с невеверным форматом записи</li>
+                </ul>
+                В форме добавления новой рекламы есть ограничения на:
+                <ul class="" style="list-style-type: disc">
+                    <li>отправку пустой формы</li>
+                    <li>добавление клиента с существующим именем и описанием в систему</li>
+                    <li>добавление дней недели не по порядку</li>
+                    <li>добавление дней недели и продолжительность рекламы неверного формата </li>
+                    <li>добавление количества повторов и стоимости неверного формата </li>
+                    <li>добавление количества повторов и стоимости меньше или равного нулю </li>
+                </ul>
+                В форме расчета есть ограничения на:
+                <ul class="" style="list-style-type: disc">
+                    <li>отправку пустой формы</li>
+                    <li>добавление 1 копии передачи (Нужна вторая!)</li>
+                    <li>добавление времени рекламы неверного формата</li>
+                    <li>добавление стоимости рекламы неверного формата</li>
+                    <li>добавление количества повторов неверного формата</li>
+                    <li>добавление количества повторов и времени рекламы, стоимости меньше или равного нулю</li>
+                </ul>
+                Добавления данных в форму "Стоимость" НЕВОЗМОЖНО! <br>
+                Более подробно с инструкцией можно ознакомиться по <a href="https://disk.yandex.ru/i/iTa8IC4639cbpg">ссылке</a>.
+            </p>
+        </div>
+    </div>
+</div>
+<script>
+    let result;
+    let duration = document.getElementById('duration');
+    let broadcast = document.getElementById('broadcast');
+    let number_repetition = document.getElementById('number_repetitions');
+    let cost = document.getElementById('cost');
+
+    // Теперь здесб опиши коэффициенты
+    {#let coefficients = {#}
+    {#    90: 5,#}
+    {#    60: 4,#}
+    {#    30: 3,#}
+    {#правильная#}
+    {#    90: 7,#}
+    {#    60: 5,#}
+    {#    30: 2,#}
+    {#    15: 1,#}
+    {#}#}
+        duration.addEventListener('input', function (e) {
+            result = e.target.value
+            if (broadcast.value !== undefined && result !== null) {
+                number_repetition.value = selectCoeff(broadcast.value);// на 5 это примерно формула
+            }
+        })
+        duration.addEventListener('input', function (e) {
+            result = e.target.value
+            if (duration.value !== undefined && result !== null) {
+                cost.value = selectCost(duration.value);// на 5 это примерно формула
+            }
+        })
+
+        let selectCoeff = function (min) {
+            let res = min / 12; //было 17
+            if (Math.floor(res) === 0) {
+                return 1;
+            }
+            return Math.floor(res);
+        }
+
+        let selectCost = function (min) {
+            let res = min * 44; //было 17
+            if (Math.floor(res) === 0) {
+                return 0;
+            }
+            return Math.floor(res);
+        }
+    }
+
+</script>
+</body>
+</html>

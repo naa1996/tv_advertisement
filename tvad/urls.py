@@ -15,4 +15,7 @@ urlpatterns = [
     path('broadcast/<int:id>', views.broadcast_view, name='broadcast_view'),
     path('create_rating', views.create_rating, name='create_rating'),
     path('rating', views.rating, name='rating'),
+    path('clear_session', views.clear_session, name='clear_session'),
+    path('calculate_cost', views.calculate_cost, name='calculate_cost'),
+    path('calculation', views.calculation, name='calculation'),
 ]

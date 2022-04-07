@@ -14,7 +14,7 @@
     <a href="{% url 'advertisement' %}">Реклама</a>
     <a href="{% url 'broadcast' %}">Передачи</a>
     <a href="{% url 'rating' %}">Рейтинг</a>
-
+    <a href="{% url 'calculation' %}">Расчёт</a>
 <h1>Рейтинг</h1>
 <div class="text-center">
     <ul>
@@ -61,47 +61,6 @@
                 id="id_dateR"
                 pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}">
         <div class="text-center">
-            <label class="mb-2">Расчётные данные</label>
-            <p>Передача на 90 мин. Кол-во показов</p>
-            <div class="mb-3">
-{#                cost = float(rating) * 250 * 1#}
-                <input type="text" name="rating_br_90" id="rating_br_90" placeholder="Передача на 90 мин." value="7">
-            </div>
-            <label class="mb-2">Передача на 60 мин. Кол-во показов</label>
-            <div class="mb-3">
-{#                cost = float(rating) * 250 * 1#}
-                <input type="text" name="rating_br_60" id="rating_br_60" placeholder="Передача на 60 мин." value="5">
-            </div>
-            <label class="mb-2">Передача на 30 мин. Кол-во показов</label>
-            <div class="mb-3">
-{#                cost = float(rating) * 250 * 1#}
-                <input type="text" name="rating_br_30" id="rating_br_30" placeholder="Передача на 30 мин." value="2">
-            </div>
-            <label class="mb-2">Передача на 15 мин и меньше. Кол-во показов</label>
-            <div class="mb-3">
-{#                cost = float(rating) * 250 * 1#}
-                <input type="text" name="rating_br_15" id="rating_br_15" placeholder="Передача на 15 мин." value="1">
-            </div>
-            <label class="mb-2">Стоимость рекламы на 90 сек</label>
-            <div class="mb-3">
-{#                cost = float(rating) * 250 * 1#}
-                <input type="text" name="cost_90" id="cost_90" placeholder="Стоимость на 90 сек." value="4000">
-            </div>
-            <label class="mb-2">Стоимость рекламы на 60 сек</label>
-            <div class="mb-3">
-{#                cost = float(rating) * 250 * 1#}
-                <input type="text" name="cost_60" id="cost_60" placeholder="Стоимость на 60 сек." value="2000">
-            </div>
-            <label class="mb-2">Стоимость рекламы на 30 сек</label>
-            <div class="mb-3">
-{#                cost = float(rating) * 250 * 1#}
-                <input type="text" name="cost_30" id="cost_30" placeholder="Стоимость на 30 сек." value="1000">
-            </div>
-            <label class="mb-2">Стоимость рекламы на 15 сек и меньше</label>
-            <div class="mb-3">
-{#                cost = float(rating) * 250 * 1#}
-                <input type="text" name="cost_15" id="cost_15" placeholder="Стоимость на 15 сек." value="500">
-            </div>
                 <button type="submit" class="main_button" id="btncreate">Добавить рекламу</button>
                 <input type="hidden" name="next" value="{{ next }}" />
         </div>

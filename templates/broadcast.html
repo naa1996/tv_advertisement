@@ -14,7 +14,7 @@
     <a href="{% url 'advertisement' %}">Реклама</a>
     <a href="{% url 'broadcast' %}">Передачи</a>
     <a href="{% url 'rating' %}">Рейтинг</a>
-
+    <a href="{% url 'calculation' %}">Расчёт</a>
 <h1>Передачи</h1>
 <div class="text-center">
     <ul>
@@ -31,6 +31,7 @@
             <tr>
                 <td>
                     <a href="broadcast/{{ tvad.id }}" style="text-decoration: none; color: blue">
+                        {{ tvad.id }}
                         {{ tvad }}
                     </a>
                 </td>

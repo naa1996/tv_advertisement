@@ -1,8 +1,10 @@
 from django.shortcuts import render
+from django.contrib.sessions.models import Session
 from django.shortcuts import redirect
 from django.contrib import messages
 from .models import Customer, Status, Advertisement, Broadcast, Rating
 from django.shortcuts import get_object_or_404
+from django.db.models import Avg, Max, Min
 import datetime
 import getpass
 
@@ -19,6 +21,8 @@ def create_customer(request):
         print(name)
         number = request.POST['number']
         print(number)
+        bank_details = request.POST['bank_details']
+        print(bank_details)
         contact_person = request.POST['cont']
         print(contact_person)
         telephone = request.POST['tel']
@@ -27,49 +31,62 @@ def create_customer(request):
         print(money)
         name_c = Customer.objects.filter(name=name)
         tel_c = Customer.objects.filter(telephone=telephone)
-        if (name != '') & (number != '') & (contact_person != '') & (telephone != '') & (money != ''):
+        if (name != '') & (number != '') & (bank_details != '') & (contact_person != '') & (telephone != '') & (money != ''):
             if telephone.isnumeric():
                 if len(telephone) == 11:
                     if not name_c:
                         if not tel_c:
+                            if not bank_details.isalpha():
                                 if money.isnumeric():
-                                    Customer.objects.create(
-                                        name=name,
-                                        contract_number=number,
-                                        contact_person=contact_person,
-                                        telephone=telephone,
-                                        money=money,
-                                    )
-                                    print('Клиент успешно добавлен+')
-                                    messages.error(request, 'Клиент успешно добавлен', extra_tags='saveCU')
-                                    return redirect('customer')
+                                    if(int(money)!=0)&(int(money)>0):
+                                        Customer.objects.create(
+                                            name=name,
+                                            contract_number=number,
+                                            contact_person=contact_person,
+                                            telephone=telephone,
+                                            money=money,
+                                        )
+                                        print('Клиент успешно добавлен+')
+                                        messages.error(request, 'Клиент успешно добавлен', extra_tags='saveCU')
+                                        return redirect('calculation')
+                                    else:
+                                        print('Не удалось добавить информацию. Неверный формат записи суммы. Сумма должна быть больше нуля')
+                                        messages.error(request,
+                                                       'Не удалось добавить информацию. Неверный формат записи суммы',
+                                                       extra_tags='saveCU')
+                                        return redirect('calculation')
                                 else:
                                     print('Не удалось добавить информацию. Неверный формат записи суммы')
                                     messages.error(request, 'Не удалось добавить информацию. Неверный формат записи суммы',
                                                    extra_tags='saveCU')
-                                    return redirect('customer')
+                                    return redirect('calculation')
+                            else:
+                                print('Не удалось добавить информацию. Неверный формат записи реквизитов')
+                                messages.error(request, 'Не удалось добавить информацию. Неверный формат записи реквизитов',
+                                               extra_tags='saveCU')
+                                return redirect('calculation')
                         else:
                             print('Клиент c таким номером телефона уже существует+')
                             messages.error(request, 'Клиент c таким номером телефона уже существует', extra_tags='saveCU')
-                            return redirect('customer')
+                            return redirect('calculation')
                     else:
                         print('Клиент c таким именем уже существует+')
                         messages.error(request, 'Клиент c таким именем уже существует', extra_tags='saveCU')
-                        return redirect('customer')
+                        return redirect('calculation')
                 else:
                     print('Не удалось добавить информацию. Неверный формат номера+')
                     messages.error(request, 'Не удалось добавить информацию. Неверный формат номера', extra_tags='saveCU')
-                    return redirect('customer')
+                    return redirect('calculation')
             else:
                 print('Не удалось добавить информацию. Неверный формат записи телефона+')
                 messages.error(request, 'Не удалось добавить информацию. Неверный формат записи телефона',
                                extra_tags='saveCU')
-                return redirect('customer')
+                return redirect('calculation')
         else:
             print(1)
-            return redirect('customer')
+            return redirect('calculation')
     else:
-        return redirect('customer')
+        return redirect('calculation')
 
 
 def customer(request):
@@ -112,56 +129,83 @@ def create_advertisement(request):
         status = request.POST['status']
         print('status', status)
         print('id', broadcast)
+        number_repetitions = request.POST['number_repetitions_r']
+        print(number_repetitions)
+        cost_r = request.POST['cost_r']
+        print(cost_r)
         customer0 = Customer.objects.get(id=selected_customer)
         status0 = Status.objects.get(id=status)
         name_a = Advertisement.objects.filter(name=name)
         desc_a = Advertisement.objects.filter(description=desc)
-        dir90 = int(90)
-        dir60= int(60)
-        dir30= int(30)
-        dir15= int(15)
-        dir0 = int(0)
-        if (name != '') & (desc != '') & (dur != '') & (day_week != '') & (selected_customer != ''):
+        if (name != '') & (desc != '') & (dur != '') & (day_week != '') & (selected_customer != '')& (number_repetitions != '') & (cost_r != ''):
             if dur.isnumeric():
                 if day_week.isnumeric():
                     if str(day_week) in '123456789':
-                        if not name_a:
-                            if not desc_a:
-                                Advertisement.objects.create(
-                                    name=name,
-                                    description=desc,
-                                    duration=dur,
-                                    day_week=day_week,
-                                    customer=customer0,
-                                    status=status0,
-                                )
-                                print('Реклама успешно добавлена+')
-                                messages.error(request, 'Реклама успешно добавлена', extra_tags='saveAD')
-                                return redirect('advertisement')
+                        if number_repetitions.isnumeric():
+                            if (int(number_repetitions) != 0) & (int(number_repetitions) > 0):
+                                if cost_r.isnumeric():
+                                    if (int(cost_r) !=0) & (int(cost_r)>0):
+                                        if not name_a:
+                                            if not desc_a:
+                                                Advertisement.objects.create(
+                                                    name=name,
+                                                    description=desc,
+                                                    duration=dur,
+                                                    day_week=day_week,
+                                                    number_repetitions=number_repetitions,
+                                                    cost=cost_r,
+                                                    customer=customer0,
+                                                    status=status0,
+
+                                                )
+                                                print('Реклама успешно добавлена+')
+                                                messages.error(request, 'Реклама успешно добавлена', extra_tags='saveCU')
+                                                return redirect('calculation')
+                                            else:
+                                                print('Реклама c таким описанием уже существует+')
+                                                messages.error(request, 'Реклама c таким описанием уже существует', extra_tags='saveCU')
+                                                return redirect('calculation')
+                                        else:
+                                            print('Реклама c таким названием уже существует')
+                                            messages.error(request,
+                                                           'Реклама c таким названием уже существует',
+                                                           extra_tags='saveCU')
+                                            return redirect('calculation')
+                                    else:
+                                        print('Не удалось добавить информацию. Неверный формат стоимости')
+                                        messages.error(request, 'Не удалось добавить информацию. Неверный формат стоимости',
+                                                       extra_tags='saveCU')
+                                        return redirect('calculation')
+                                else:
+                                    print('Не удалось добавить информацию. Неверный формат стоимости')
+                                    messages.error(request, 'Не удалось добавить информацию. Неверный формат стоимости',
+                                                   extra_tags='saveCU')
+                                    return redirect('calculation')
                             else:
-                                print('Реклама c таким описанием уже существует+')
-                                messages.error(request, 'Реклама c таким описанием уже существует', extra_tags='saveAD')
-                                return redirect('advertisement')
+                                print('Не удалось добавить информацию. Неверный формат количества повторов')
+                                messages.error(request, 'Не удалось добавить информацию. Неверный формат количества повторов',
+                                               extra_tags='saveCU')
+                                return redirect('calculation')
                         else:
-                            print('Реклама c таким именем уже существует+')
-                            messages.error(request, 'Реклама c таким именем уже существует', extra_tags='saveAD')
-                            return redirect('advertisement')
+                            print('Не удалось добавить информацию. Неверный формат количества повторов')
+                            messages.error(request, 'Не удалось добавить информацию. Неверный формат количества повторов', extra_tags='saveCU')
+                            return redirect('calculation')
                     else:
                         print('Дни недели не по порядку+')
-                        messages.error(request, 'Дни недели не по порядку', extra_tags='saveAD')
-                        return redirect('advertisement')
+                        messages.error(request, 'Дни недели не по порядку', extra_tags='saveCU')
+                        return redirect('calculation')
                 else:
                     print('Не удалось добавить информацию. Неверный формат записи дней недели+')
-                    messages.error(request, 'Не удалось добавить информацию. Неверный формат записи дней недели', extra_tags='saveAD')
-                    return redirect('advertisement')
+                    messages.error(request, 'Не удалось добавить информацию. Неверный формат записи дней недели', extra_tags='saveCU')
+                    return redirect('calculation')
             else:
                 print('Не удалось добавить информацию. Неверный формат записи продолжительности рекламы+')
-                messages.error(request, 'Не удалось добавить информацию. Неверный формат записи продолжительности рекламы', extra_tags='saveAD')
-                return redirect('advertisement')
+                messages.error(request, 'Не удалось добавить информацию. Неверный формат записи продолжительности рекламы', extra_tags='saveCU')
+                return redirect('calculation')
         else:
-            return redirect('advertisement')
+            return redirect('calculation')
     else:
-        return redirect('advertisement')
+        return redirect('calculation')
 
 
 def advertisement(request):
@@ -274,20 +318,12 @@ def create_rating(request):
         print('id_date', id_date)
         broadcast_name = Broadcast.objects.get(id=broadcast).name
         print('broadcast_name', broadcast_name)
-        rating_br_90 = request.POST['rating_br_90']
-        rating_br_60 = request.POST['rating_br_60']
-        rating_br_30 = request.POST['rating_br_30']
-        rating_br_15 = request.POST['rating_br_15']
-        cost_90 = request.POST['cost_90']
-        cost_60 = request.POST['cost_60']
-        cost_30 = request.POST['cost_30']
-        cost_15 = request.POST['cost_15']
         id_broadcast = Broadcast.objects.get(id=broadcast)
         adv = Broadcast.objects.get(name=broadcast_name).advertisement
         print(adv)
-        if (broadcast != '') & (rating != '') & (id_date != '') & (rating_br_90 != '') & (rating_br_60 != '') & (rating_br_30 != '') & (rating_br_15 != '') & (cost_90 != '') & (cost_60 != '') & (cost_30 != '') & (cost_15 != ''):
+        if (broadcast != '') & (rating != '') & (id_date != ''):
             if rating.isnumeric():
-                if (rating_br_90.isnumeric()) & (rating_br_60.isnumeric()) & (rating_br_30.isnumeric()) & (rating_br_15.isnumeric()) & (cost_90.isnumeric()) & (cost_60.isnumeric()) & (cost_30.isnumeric()) & (cost_15.isnumeric()):
+
                     # Advertisement.objects.filter(broadcast__advertisement=broadcast):
                     Rating.objects.create(
                         broadcast=id_broadcast,
@@ -309,350 +345,37 @@ def create_rating(request):
                     print('название передачи: ', broadcast)
                     print('заказчик: ', duration_customer_name)
                     print('время передачи: ', time_broadcast)
-                    if(duration >=90):
-                        if(time_broadcast>=90):
-                            print(1)
-                            cost = float(rating) * float(cost_90) * float(rating_br_90)
-                            print(00, cost)
-                            #внесение данных о заработанных средствах
-                            costs = Customer.objects.get(id=int(duration_customer))
-                            costs.money -= cost
-                            costs.save()
-                            f = open('c:/users/' + getpass.getuser() + '/Desktop/rating_.doc', 'w')
-                            f.write('Счёт-квитанция на оплату услуг телекомпании от '+id_date+'\n'+'\n'+'Название передачи: ' + broadcast_name +'\n' +
-                                    'Название рекламы: ' + duration_name + '\n' + 'Время рекламы (сек): ' + str(duration) + '\n' + 'Заказчик: ' +
-                                    duration_customer_name + '\n' + 'Время передачи (мин): ' + str(time_broadcast) + '\n' + 'Рейтинг: ' + str(rating) +
-                                    '\n' + 'Расчёт: ' + str(float(rating))+'*'+'4000'+'*'+'7' + '\n' + 'Стоимость (руб): ' +
-                                    str(cost)+'\n''\n'+ 'Специалист по рейтингу          Ульянов Н.А.')
-                            f.close()
-                        elif(time_broadcast>=60):
-                            print(2)
-                            cost = float(rating) * float(cost_90) * float(rating_br_60)
-                            print(00, cost)
-                            # внесение данных о заработанных средствах
-                            costs = Customer.objects.get(id=int(duration_customer))
-                            costs.money -= cost
-                            costs.save()
-                            f = open('c:/users/' + getpass.getuser() + '/Desktop/rating_.doc', 'w')
-                            f.write('Счёт-квитанция на оплату услуг телекомпании от '+id_date+'\n'+'\n'+'Название передачи: ' + broadcast_name +'\n' +
-                                    'Название рекламы: ' + duration_name + '\n' + 'Время рекламы (сек): ' + str(duration) + '\n' + 'Заказчик: ' +
-                                    duration_customer_name + '\n' + 'Время передачи (мин): ' + str(time_broadcast) + '\n' + 'Рейтинг: ' + str(rating) +
-                                    '\n' + 'Расчёт: ' + str(float(rating))+'*'+'4000'+'*'+'5' + '\n' + 'Стоимость (руб): ' +
-                                    str(cost)+'\n''\n'+ 'Специалист по рейтингу          Ульянов Н.А.')
-                            f.close()
-                        elif(time_broadcast>=30):
-                            print(3)
-                            cost = float(rating) * float(cost_90) * float(rating_br_30)
-                            print(00, cost)
-                            # внесение данных о заработанных средствах
-                            costs = Customer.objects.get(id=int(duration_customer))
-                            costs.money -= cost
-                            costs.save()
-                            f = open('c:/users/' + getpass.getuser() + '/Desktop/rating_.doc', 'w')
-                            f.write('Счёт-квитанция на оплату услуг телекомпании от '+id_date+'\n'+'\n'+'Название передачи: ' + broadcast_name +'\n' +
-                                    'Название рекламы: ' + duration_name + '\n' + 'Время рекламы (сек): ' + str(duration) + '\n' + 'Заказчик: ' +
-                                    duration_customer_name + '\n' + 'Время передачи (мин): ' + str(time_broadcast) + '\n' + 'Рейтинг: ' + str(rating) +
-                                    '\n' + 'Расчёт: ' + str(float(rating))+'*'+'4000'+'*'+'2' + '\n' + 'Стоимость (руб): ' +
-                                    str(cost)+'\n''\n'+ 'Специалист по рейтингу          Ульянов Н.А.')
-                            f.close()
-                        elif (time_broadcast >= 15):
-                            print(4)
-                            cost = float(rating) * float(cost_90) * float(rating_br_15)
-                            print(00, cost)
-                            # внесение данных о заработанных средствах
-                            costs = Customer.objects.get(id=int(duration_customer))
-                            costs.money -= cost
-                            costs.save()
-                            f = open('c:/users/' + getpass.getuser() + '/Desktop/rating_.doc', 'w')
-                            f.write(
-                                'Счёт-квитанция на оплату услуг телекомпании от ' + id_date + '\n' + '\n' + 'Название передачи: ' + broadcast_name + '\n' +
-                                'Название рекламы: ' + duration_name + '\n' + 'Время рекламы (сек): ' + str(
-                                    duration) + '\n' + 'Заказчик: ' +
-                                duration_customer_name + '\n' + 'Время передачи (мин): ' + str(
-                                    time_broadcast) + '\n' + 'Рейтинг: ' + str(rating) +
-                                '\n' + 'Расчёт: ' + str(
-                                    float(rating)) + '*' + '4000' + '*' + '2' + '\n' + 'Стоимость (руб): ' +
-                                str(cost) + '\n''\n' + 'Специалист по рейтингу          Ульянов Н.А.')
-                            f.close()
-                        elif (time_broadcast < 15):
-                            print(5)
-                            cost = float(rating) * float(cost_90/2) * float(rating_br_15)
-                            print(00, cost)
-                            # внесение данных о заработанных средствах
-                            costs = Customer.objects.get(id=int(duration_customer))
-                            costs.money -= cost
-                            costs.save()
-                            f = open('c:/users/' + getpass.getuser() + '/Desktop/rating_.doc', 'w')
-                            f.write(
-                                'Счёт-квитанция на оплату услуг телекомпании от ' + id_date + '\n' + '\n' + 'Название передачи: ' + broadcast_name + '\n' +
-                                'Название рекламы: ' + duration_name + '\n' + 'Время рекламы (сек): ' + str(
-                                    duration) + '\n' + 'Заказчик: ' +
-                                duration_customer_name + '\n' + 'Время передачи (мин): ' + str(
-                                    time_broadcast) + '\n' + 'Рейтинг: ' + str(rating) +
-                                '\n' + 'Расчёт: ' + str(
-                                    float(rating)) + '*' + '4000' + '*' + '2' + '\n' + 'Стоимость (руб): ' +
-                                str(cost) + '\n''\n' + 'Специалист по рейтингу          Ульянов Н.А.')
-                            f.close()
-                    elif(duration>=60):
-                        if (time_broadcast >= 90):
-                            print(6)
-                            cost = float(rating) * float(cost_60) * float(rating_br_90)
-                            print(00, cost)
-                            # внесение данных о заработанных средствах
-                            costs = Customer.objects.get(id=int(duration_customer))
-                            costs.money -= cost
-                            costs.save()
-                            f = open('c:/users/' + getpass.getuser() + '/Desktop/rating_.doc', 'w')
-                            f.write('Счёт-квитанция на оплату услуг телекомпании от '+id_date+'\n'+'\n'+'Название передачи: ' + broadcast_name +'\n' +
-                                    'Название рекламы: ' + duration_name + '\n' + 'Время рекламы (сек): ' + str(duration) + '\n' + 'Заказчик: ' +
-                                    duration_customer_name + '\n' + 'Время передачи (мин): ' + str(time_broadcast) + '\n' + 'Рейтинг: ' + str(rating) +
-                                    '\n' + 'Расчёт: ' + str(float(rating))+'*'+'2000'+'*'+'7' + '\n' + 'Стоимость (руб): ' +
-                                    str(cost)+'\n''\n'+ 'Специалист по рейтингу          Ульянов Н.А.')
-                            f.close()
-                        elif (time_broadcast >= 60):
-                            print(7)
-                            cost = float(rating) * float(cost_60) * float(rating_br_60)
-                            print(00, cost)
-                            # внесение данных о заработанных средствах
-                            costs = Customer.objects.get(id=int(duration_customer))
-                            costs.money -= cost
-                            costs.save()
-                            f = open('c:/users/' + getpass.getuser() + '/Desktop/rating_.doc', 'w')
-                            f.write('Счёт-квитанция на оплату услуг телекомпании от '+id_date+'\n'+'\n'+'Название передачи: ' + broadcast_name +'\n' +
-                                    'Название рекламы: ' + duration_name + '\n' + 'Время рекламы (сек): ' + str(duration) + '\n' + 'Заказчик: ' +
-                                    duration_customer_name + '\n' + 'Время передачи (мин): ' + str(time_broadcast) + '\n' + 'Рейтинг: ' + str(rating) +
-                                    '\n' + 'Расчёт: ' + str(float(rating))+'*'+'2000'+'*'+'5' + '\n' + 'Стоимость (руб): ' +
-                                    str(cost)+'\n''\n'+ 'Специалист по рейтингу          Ульянов Н.А.')
-                            f.close()
-                        elif (time_broadcast >= 30):
-                            print(8)
-                            cost = float(rating) * float(cost_60) * float(rating_br_30)
-                            print(00, cost)
-                            # внесение данных о заработанных средствах
-                            costs = Customer.objects.get(id=int(duration_customer))
-                            costs.money -= cost
-                            costs.save()
-                            f = open('c:/users/' + getpass.getuser() + '/Desktop/rating_.doc', 'w')
-                            f.write('Счёт-квитанция на оплату услуг телекомпании от '+id_date+'\n'+'\n'+'Название передачи: ' + broadcast_name +'\n' +
-                                    'Название рекламы: ' + duration_name + '\n' + 'Время рекламы (сек): ' + str(duration) + '\n' + 'Заказчик: ' +
-                                    duration_customer_name + '\n' + 'Время передачи (мин): ' + str(time_broadcast) + '\n' + 'Рейтинг: ' + str(rating) +
-                                    '\n' + 'Расчёт: ' + str(float(rating))+'*'+'2000'+'*'+'2' + '\n' + 'Стоимость (руб): ' +
-                                    str(cost)+'\n''\n'+ 'Специалист по рейтингу          Ульянов Н.А.')
-                            f.close()
-                        elif (time_broadcast >= 15):
-                            print(9)
-                            cost = float(rating) * float(cost_60) * float(rating_br_15)
-                            print(00, cost)
-                            # внесение данных о заработанных средствах
-                            costs = Customer.objects.get(id=int(duration_customer))
-                            costs.money -= cost
-                            costs.save()
-                            f = open('c:/users/' + getpass.getuser() + '/Desktop/rating_.doc', 'w')
-                            f.write(
-                                'Счёт-квитанция на оплату услуг телекомпании от ' + id_date + '\n' + '\n' + 'Название передачи: ' + broadcast_name + '\n' +
-                                'Название рекламы: ' + duration_name + '\n' + 'Время рекламы (сек): ' + str(
-                                    duration) + '\n' + 'Заказчик: ' +
-                                duration_customer_name + '\n' + 'Время передачи (мин): ' + str(
-                                    time_broadcast) + '\n' + 'Рейтинг: ' + str(rating) +
-                                '\n' + 'Расчёт: ' + str(
-                                    float(rating)) + '*' + '2000' + '*' + '2' + '\n' + 'Стоимость (руб): ' +
-                                str(cost) + '\n''\n' + 'Специалист по рейтингу          Ульянов Н.А.')
-                            f.close()
-                        elif (time_broadcast < 15):
-                            print(10)
-                            cost = float(rating) * float(cost_60/2) * float(rating_br_15)
-                            print(00, cost)
-                            # внесение данных о заработанных средствах
-                            costs = Customer.objects.get(id=int(duration_customer))
-                            costs.money -= cost
-                            costs.save()
-                            f = open('c:/users/' + getpass.getuser() + '/Desktop/rating_.doc', 'w')
-                            f.write(
-                                'Счёт-квитанция на оплату услуг телекомпании от ' + id_date + '\n' + '\n' + 'Название передачи: ' + broadcast_name + '\n' +
-                                'Название рекламы: ' + duration_name + '\n' + 'Время рекламы (сек): ' + str(
-                                    duration) + '\n' + 'Заказчик: ' +
-                                duration_customer_name + '\n' + 'Время передачи (мин): ' + str(
-                                    time_broadcast) + '\n' + 'Рейтинг: ' + str(rating) +
-                                '\n' + 'Расчёт: ' + str(
-                                    float(rating)) + '*' + '2000' + '*' + '2' + '\n' + 'Стоимость (руб): ' +
-                                str(cost) + '\n''\n' + 'Специалист по рейтингу          Ульянов Н.А.')
-                            f.close()
-                    elif (duration >= 30):
-                        if (time_broadcast >= 90):
-                            print(11)
-                            cost = float(rating) * float(cost_30) * float(rating_br_90)
-                            print(00, cost)
-                            # внесение данных о заработанных средствах
-                            costs = Customer.objects.get(id=int(duration_customer))
-                            costs.money -= cost
-                            costs.save()
-                            f = open('c:/users/'+getpass.getuser()+'/Desktop/rating_.doc', 'w')
-                            f.write('Счёт-квитанция на оплату услуг телекомпании от '+id_date+'\n'+'\n'+'Название передачи: ' + broadcast_name +'\n' +
-                                    'Название рекламы: ' + duration_name + '\n' + 'Время рекламы (сек): ' + str(duration) + '\n' + 'Заказчик: ' +
-                                    duration_customer_name + '\n' + 'Время передачи (мин): ' + str(time_broadcast) + '\n' + 'Рейтинг: ' + str(rating) +
-                                    '\n' + 'Расчёт: ' + str(float(rating))+'*'+'1000'+'*'+'7' + '\n' + 'Стоимость (руб): ' +
-                                    str(cost)+'\n''\n'+ 'Специалист по рейтингу          Ульянов Н.А.')
-                            f.close()
-                        elif (time_broadcast >= 60):
-                            print(12)
-                            cost = float(rating) * float(cost_30) * float(rating_br_60)
-                            print(00, cost)
-                            # внесение данных о заработанных средствах
-                            costs = Customer.objects.get(id=int(duration_customer))
-                            costs.money -= cost
-                            costs.save()
-                            f = open('c:/users/' + getpass.getuser() + '/Desktop/rating_.doc', 'w')
-                            f.write('Счёт-квитанция на оплату услуг телекомпании от '+id_date+'\n'+'\n'+'Название передачи: ' + broadcast_name +'\n' +
-                                    'Название рекламы: ' + duration_name + '\n' + 'Время рекламы (сек): ' + str(duration) + '\n' + 'Заказчик: ' +
-                                    duration_customer_name + '\n' + 'Время передачи (мин): ' + str(time_broadcast) + '\n' + 'Рейтинг: ' + str(rating) +
-                                    '\n' + 'Расчёт: ' + str(float(rating))+'*'+'1000'+'*'+'5' + '\n' + 'Стоимость (руб): ' +
-                                    str(cost)+'\n''\n'+ 'Специалист по рейтингу          Ульянов Н.А.')
-                            f.close()
-                        elif (time_broadcast >= 30):
-                            print(13)
-                            cost = float(rating) * float(cost_30) * float(rating_br_30)
-                            print(00, cost)
-                            # внесение данных о заработанных средствах
-                            costs = Customer.objects.get(id=int(duration_customer))
-                            costs.money -= cost
-                            costs.save()
-                            f = open('c:/users/' + getpass.getuser() + '/Desktop/rating_.doc', 'w')
-                            f.write('Счёт-квитанция на оплату услуг телекомпании от '+id_date+'\n'+'\n'+'Название передачи: ' + broadcast_name +'\n' +
-                                    'Название рекламы: ' + duration_name + '\n' + 'Время рекламы (сек): ' + str(duration) + '\n' + 'Заказчик: ' +
-                                    duration_customer_name + '\n' + 'Время передачи (мин): ' + str(time_broadcast) + '\n' + 'Рейтинг: ' + str(rating) +
-                                    '\n' + 'Расчёт: ' + str(float(rating))+'*'+'1000'+'*'+'2' + '\n' + 'Стоимость (руб): ' +
-                                    str(cost)+'\n''\n'+ 'Специалист по рейтингу          Ульянов Н.А.')
-                            f.close()
-                        elif (time_broadcast >= 15):
-                            print(14)
-                            cost = float(rating) * float(cost_30) * float(rating_br_15)
-                            print(00, cost)
-                            # внесение данных о заработанных средствах
-                            costs = Customer.objects.get(id=int(duration_customer))
-                            costs.money -= cost
-                            costs.save()
-                            f = open('c:/users/' + getpass.getuser() + '/Desktop/rating_.doc', 'w')
-                            f.write(
-                                'Счёт-квитанция на оплату услуг телекомпании от ' + id_date + '\n' + '\n' + 'Название передачи: ' + broadcast_name + '\n' +
-                                'Название рекламы: ' + duration_name + '\n' + 'Время рекламы (сек): ' + str(
-                                    duration) + '\n' + 'Заказчик: ' +
-                                duration_customer_name + '\n' + 'Время передачи (мин): ' + str(
-                                    time_broadcast) + '\n' + 'Рейтинг: ' + str(rating) +
-                                '\n' + 'Расчёт: ' + str(
-                                    float(rating)) + '*' + '1000' + '*' + '1' + '\n' + 'Стоимость (руб): ' +
-                                str(cost) + '\n''\n' + 'Специалист по рейтингу          Ульянов Н.А.')
-                            f.close()
-                        elif (time_broadcast < 15):
-                            print(15)
-                            cost = float(rating) * float(cost_30/2) * float(rating_br_15)
-                            print(00, cost)
-                            # внесение данных о заработанных средствах
-                            costs = Customer.objects.get(id=int(duration_customer))
-                            costs.money -= cost
-                            costs.save()
-                            f = open('c:/users/' + getpass.getuser() + '/Desktop/rating_.doc', 'w')
-                            f.write(
-                                'Счёт-квитанция на оплату услуг телекомпании от ' + id_date + '\n' + '\n' + 'Название передачи: ' + broadcast_name + '\n' +
-                                'Название рекламы: ' + duration_name + '\n' + 'Время рекламы (сек): ' + str(
-                                    duration) + '\n' + 'Заказчик: ' +
-                                duration_customer_name + '\n' + 'Время передачи (мин): ' + str(
-                                    time_broadcast) + '\n' + 'Рейтинг: ' + str(rating) +
-                                '\n' + 'Расчёт: ' + str(
-                                    float(rating)) + '*' + '1000' + '*' + '1' + '\n' + 'Стоимость (руб): ' +
-                                str(cost) + '\n''\n' + 'Специалист по рейтингу          Ульянов Н.А.')
-                            f.close()
-                    elif (duration >= 15):
-                        # время передачи
-                        if (time_broadcast >= 90):
-                            print(16)
-                            cost = float(rating) * float(cost_15) * float(rating_br_90)
-                            print(00, cost)
-                            # внесение данных о заработанных средствах
-                            costs = Customer.objects.get(id=int(duration_customer))
-                            costs.money -= cost
-                            costs.save()
-                            f = open('c:/users/' + getpass.getuser() + '/Desktop/rating_.doc', 'w')
-                            f.write('Счёт-квитанция на оплату услуг телекомпании от '+id_date+'\n'+'\n'+'Название передачи: ' + broadcast_name +'\n' +
-                                    'Название рекламы: ' + duration_name + '\n' + 'Время рекламы (сек): ' + str(duration) + '\n' + 'Заказчик: ' +
-                                    duration_customer_name + '\n' + 'Время передачи (мин): ' + str(time_broadcast) + '\n' + 'Рейтинг: ' + str(rating) +
-                                    '\n' + 'Расчёт: ' + str(float(rating))+'*'+'500'+'*'+'7' + '\n' + 'Стоимость (руб): ' +
-                                    str(cost)+'\n''\n'+ 'Специалист по рейтингу          Ульянов Н.А.')
-                            f.close()
-                        elif (time_broadcast >= 60):
-                            print(17)
-                            cost = float(rating) * float(cost_15) * float(rating_br_60)
-                            print(00, cost)
-                            # внесение данных о заработанных средствах
-                            costs = Customer.objects.get(id=int(duration_customer))
-                            costs.money -= cost
-                            costs.save()
-                            f = open('c:/users/' + getpass.getuser() + '/Desktop/rating_.doc', 'w')
-                            f.write('Счёт-квитанция на оплату услуг телекомпании от '+id_date+'\n'+'\n'+'Название передачи: ' + broadcast_name +'\n' +
-                                    'Название рекламы: ' + duration_name + '\n' + 'Время рекламы (сек): ' + str(duration) + '\n' + 'Заказчик: ' +
-                                    duration_customer_name + '\n' + 'Время передачи (мин): ' + str(time_broadcast) + '\n' + 'Рейтинг: ' + str(rating) +
-                                    '\n' + 'Расчёт: ' + str(float(rating))+'*'+'500'+'*'+'5' + '\n' + 'Стоимость (руб): ' +
-                                    str(cost)+'\n''\n'+ 'Специалист по рейтингу          Ульянов Н.А.')
-                            f.close()
-                        elif (time_broadcast >= 30):
-                            cost = float(rating) * float(cost_15) * float(rating_br_30)
-                            print(00, cost)
-                            # внесение данных о заработанных средствах
-                            costs = Customer.objects.get(id=int(duration_customer))
-                            costs.money -= cost
-                            costs.save()
-                            f = open('c:/users/' + getpass.getuser() + '/Desktop/rating_.doc', 'w')
-                            f.write('Счёт-квитанция на оплату услуг телекомпании от '+id_date+'\n'+'\n'+'Название передачи: ' + broadcast_name +'\n' +
-                                    'Название рекламы: ' + duration_name + '\n' + 'Время рекламы (сек): ' + str(duration) + '\n' + 'Заказчик: ' +
-                                    duration_customer_name + '\n' + 'Время передачи (мин): ' + str(time_broadcast) + '\n' + 'Рейтинг: ' + str(rating) +
-                                    '\n' + 'Расчёт: ' + str(float(rating))+'*'+'500'+'*'+'2' + '\n' + 'Стоимость (руб): ' +
-                                    str(cost)+'\n''\n'+ 'Специалист по рейтингу          Ульянов Н.А.')
-                            f.close()
-                        elif (time_broadcast >= 15):
-                            cost = float(rating) * float(cost_15) * float(rating_br_15)
-                            print(00, cost)
-                            # внесение данных о заработанных средствах
-                            costs = Customer.objects.get(id=int(duration_customer))
-                            costs.money -= cost
-                            costs.save()
-                            f = open('c:/users/' + getpass.getuser() + '/Desktop/rating_.doc', 'w')
-                            f.write(
-                                'Счёт-квитанция на оплату услуг телекомпании от ' + id_date + '\n' + '\n' + 'Название передачи: ' + broadcast_name + '\n' +
-                                'Название рекламы: ' + duration_name + '\n' + 'Время рекламы (сек): ' + str(
-                                    duration) + '\n' + 'Заказчик: ' +
-                                duration_customer_name + '\n' + 'Время передачи (мин): ' + str(
-                                    time_broadcast) + '\n' + 'Рейтинг: ' + str(rating) +
-                                '\n' + 'Расчёт: ' + str(
-                                    float(rating)) + '*' + '500' + '*' + '2' + '\n' + 'Стоимость (руб): ' +
-                                str(cost) + '\n''\n' + 'Специалист по рейтингу          Ульянов Н.А.')
-                            f.close()
-                        elif (time_broadcast < 15):
-                            cost = float(rating) * float(cost_15/2) * float(rating_br_15)
-                            print(00, cost)
-                            # внесение данных о заработанных средствах
-                            costs = Customer.objects.get(id=int(duration_customer))
-                            costs.money -= cost
-                            costs.save()
-                            f = open('c:/users/' + getpass.getuser() + '/Desktop/rating_.doc', 'w')
-                            f.write(
-                                'Счёт-квитанция на оплату услуг телекомпании от ' + id_date + '\n' + '\n' + 'Название передачи: ' + broadcast_name + '\n' +
-                                'Название рекламы: ' + duration_name + '\n' + 'Время рекламы (сек): ' + str(
-                                    duration) + '\n' + 'Заказчик: ' +
-                                duration_customer_name + '\n' + 'Время передачи (мин): ' + str(
-                                    time_broadcast) + '\n' + 'Рейтинг: ' + str(rating) +
-                                '\n' + 'Расчёт: ' + str(
-                                    float(rating)) + '*' + '500' + '*' + '2' + '\n' + 'Стоимость (руб): ' +
-                                str(cost) + '\n''\n' + 'Специалист по рейтингу          Ульянов Н.А.')
-                            f.close()
+
+                    number = Advertisement.objects.get(name=duration_name).number_repetitions
+                    cost_1 = Advertisement.objects.get(name=duration_name).cost
+                    print(number)
+                    print(cost_1)
+                    # exit()
+                    print(1)
+                    cost = float(rating) * float(cost_1) * float(number)
+                    print(00, cost)
+                    #внесение данных о заработанных средствах
+                    costs = Customer.objects.get(id=int(duration_customer))
+                    costs.money -= cost
+                    costs.save()
+                    f = open('c:/users/' + getpass.getuser() + '/Desktop/rating_.doc', 'w')
+                    f.write(
+                        'Расчетная Счёт-квитанция на оплату услуг телекомпании' + '\n' + '\n' + 'Название передачи: ' + broadcast_name + '\n' +
+                        'Название рекламы: ' '\n' + 'Время рекламы (сек): ' + str(
+                            duration) + '\n' + 'Заказчик: ' + '\n' + 'Время передачи (мин): ' + str(
+                            time_broadcast) + '\n' + 'Рейтинг (последней передачи): ' + str(rating) +
+                        '\n' + 'Стоимость за 1 передачу: ' + str(cost_1) +
+                        '\n' + 'Расчёт: ' + str(
+                            float(rating)) + '*' + str(cost_1) + '*' + str(
+                            number) + '\n' + 'Стоимость (руб): ' +
+                        str(cost) + '\n''\n' + 'Специалист по рейтингу          Ульянов Н.А.')
+                    f.close()
                     print('Данные о рейтинге успешно добавлены')
                     messages.error(request, 'Данные о рейтинге успешно добавлены', extra_tags='saveR')
                     return redirect('rating')
-                else:
-                    print('Не удалось добавить информацию. Неверный формат расчетных данных')
-                    messages.error(request, 'Не удалось добавить информацию. Неверный формат расчетных данных', extra_tags='saveR')
-                    return redirect('rating')
             else:
                 print('Не удалось добавить информацию. Неверный формат рейтинга передачи')
-                messages.error(request, 'Не удалось добавить информацию. Неверный формат продолжительности передачи', extra_tags='saveR')
+                messages.error(request, 'Не удалось добавить информацию. Неверный формат рейтинга передачи', extra_tags='saveR')
                 return redirect('rating')
         else:
             return redirect('rating')
@@ -662,7 +385,6 @@ def create_rating(request):
 def rating(request):
     rating = Rating.objects.all()
     broadcast = Broadcast.objects.all()
-
     return render(request, 'rating.html', {
         'title': 'Рейтинг',
         'rating': rating,
@@ -670,8 +392,166 @@ def rating(request):
     })
 
 
+def calculate_cost(request):
+    if request.method == 'POST':
+        duration = request.POST['duration']
+        print('Время рекламы', duration)
+        selected_broadcast = request.POST['selected_broadcast']
+        print('Передача', selected_broadcast)
+        number_repetitions = request.POST['number_repetitions']
+        print('количество повторов', number_repetitions)
+        cost_1 = request.POST['cost']
+        print('стоимость', cost_1)
+        # print(selected_broadcast.charAt(selected_broadcast[0].length()-1))
+        # exit()
+        if (duration != '') & (selected_broadcast != '') & (number_repetitions != '') & (cost_1 != ''):
+            if (selected_broadcast[-1]) == "d":
+                print(len(selected_broadcast))
+                Str = selected_broadcast
+                l = len(Str)
+                selected_broadcast = Str[:l-1]
+                print(selected_broadcast)
+                name = Broadcast.objects.get(id=selected_broadcast).name
+                print(name)
+                time_broadcast = Broadcast.objects.get(name=name).duration
+                print('время передачи', time_broadcast)
+                print(111)
+                if duration.isnumeric():
+                    if (int(duration) != 0) & (int(duration) > 0):
+                        if number_repetitions.isnumeric():
+                            if (int(number_repetitions) != 0) & (int(number_repetitions) > 0):
+                                if cost_1.isnumeric():
+                                    print(111)
+                                    if (int(cost_1) != 0) & (int(cost_1) > 0):
+                                        col = Rating.objects.filter(broadcast=selected_broadcast).count()
+                                        print('количество записей:', col)
+                                        rating_id = Rating.objects.filter(broadcast=selected_broadcast).all()
+                                        print('записи с такой передачей', rating_id)
+                                        rating_0 = Rating.objects.filter(broadcast=selected_broadcast).last()
+                                        print('рейтинг первый', rating_0)
+                                        # rating_00 = Rating.objects.filter(broadcast=selected_broadcast).aggregate(Avg('rating'))
+                                        # print('рейтинг средний', rating_00)
+                                        rating_0.id
+                                        rating_ind = Rating.objects.get(id = rating_0.id).rating
+                                        print('показатель рейтинга', rating_ind)
+                                        cost = float(rating_ind) * float(cost_1) * float(number_repetitions)
+                                        print(00, cost)
+                                        # внесение данных о заработанных средствах
+                                        # costs = Customer.objects.get(id=int(duration_customer))
+                                        # costs.money -= cost
+                                        # costs.save()
+                                        f = open('c:/users/' + getpass.getuser() + '/Desktop/rating_cost.doc', 'w')
+                                        f.write(
+                                            'Расчетная Счёт-квитанция на оплату услуг телекомпании' + '\n' + '\n' + 'Название передачи: ' + name + '\n' + 'Время рекламы (сек): ' + str(
+                                                duration) + '\n' + 'Время передачи (мин): ' + str(
+                                                time_broadcast) + '\n' + 'Рейтинг (последней передачи): ' + str(rating_ind) +
+                                            '\n' + 'Стоимость за 1 передачу: ' + str(cost_1) +
+                                            '\n' + 'Расчёт: ' + str(
+                                                float(rating_ind)) + '*' + str(cost_1) + '*' + str(number_repetitions) + '\n' + 'Стоимость (руб): ' +
+                                            str(cost) + '\n''\n' + 'Специалист по рейтингу          Ульянов Н.А.')
+                                        f.close()
+                                        #название программы
+                                        request.session['name_broadcast'] = name
+                                        #время рекламы
+                                        request.session['time_adv'] = duration
+                                        #время передачи
+                                        request.session['time_br'] = str(time_broadcast)
+                                        #количество повторов
+                                        request.session['number_repetitions'] = number_repetitions
+                                        # рейтинг последней передачи
+                                        request.session['rating'] = str(rating_ind)
+                                        # стоимость одной передачи
+                                        request.session['cost'] = cost_1
+                                        #итоговая стоимость рекламы за 1 передачу
+                                        request.session['cost_end'] = cost
+                                        return redirect('calculation')
+                                        print('Расчёт добавлен')
+                                        messages.error(request,
+                                                   'Расчёт добавлен',
+                                                   extra_tags='saveCU_с')
+                                        return redirect('calculation')
+                                    else:
+                                        print('Не удалось добавить информацию. Стоимость не является положительной')
+                                        messages.error(request,
+                                            'Не удалось добавить информацию. Стоимость не является положительной',
+                                                extra_tags='saveCU_с')
+                                        return redirect('calculation')
+                                else:
+                                    print('Не удалось добавить информацию. Неверный формат стоимости')
+                                    messages.error(request, 'Не удалось добавить информацию. Неверный формат стоимости',
+                                                   extra_tags='saveCU_с')
+                                    return redirect('calculation')
+                            else:
+                                print('Не удалось добавить информацию. Количество повторов не является положительным')
+                                messages.error(request,
+                                               'Не удалось добавить информацию. Количество повторов не является положительным',
+                                               extra_tags='saveCU_с')
+                                return redirect('calculation')
+                        else:
+                            print('Не удалось добавить информацию. Неверный формат количества повторов')
+                            messages.error(request, 'Не удалось добавить информацию. Неверный формат количества повторов',
+                                           extra_tags='saveCU_с')
+                            return redirect('calculation')
+                    else:
+                        print('Не удалось добавить информацию. Время рекламы не является положительным')
+                        messages.error(request,
+                                       'Не удалось добавить информацию. Время рекламы не является положительным',
+                                       extra_tags='saveCU_с')
+                        return redirect('calculation')
+                else:
+                    messages.error(request, 'Не удалось добавить информацию. Неверный формат времени рекламы',
+                                   extra_tags='saveCU_с')
+                    return redirect('calculation')
+            else:
+                messages.error(request, 'Не удалось добавить информацию. Выбрана не 2 копия передачи',
+                               extra_tags='saveCU_с')
+                return redirect('calculation')
+        else:
+            return redirect('calculation')
+    else:
+        return redirect('calculation')
+
+
+def clear_session(request):
+    request.session.clear()
+    return redirect(calculation)
+
+
+def calculation(request):
+    customer_all = Customer.objects.all()
+    broadcast_all = Broadcast.objects.all()
+    name_broadcast = request.session.get('name_broadcast')
+    time_adv = request.session.get('time_adv')
+    time_br = request.session.get('time_br')
+    number_repetitions = request.session.get('number_repetitions')
+    rating = request.session.get('rating')
+    cost = request.session.get('cost')
+    cost_end = request.session.get('cost_end')
+    if(name_broadcast != '') & (time_adv != '') & (time_br != '') & (number_repetitions != '') & (rating != '') & (cost != '') & (cost_end != ''):
+        return render(request, 'calculation.html', {
+            'title': 'Расчёт',
+            'customer_all': customer_all,
+            'broadcast_all': broadcast_all,
+
+            'name_broadcast': name_broadcast,
+            'time_adv': time_adv,
+            'time_br': time_br,
+            'number_repetitions': number_repetitions,
+            'rating': rating,
+            'cost': cost,
+            'cost_end': cost_end,
+        })
+    else:
+        return render(request, 'calculation.html', {
+            'title': 'Расчёт',
+            'customer_all': customer_all,
+            'broadcast_all': broadcast_all,
+        })
+
+
 def formatDateForPython(date_in):
     date_processing = date_in.replace('T', '-').replace(':', '-').split('-')
     date_processing = [int(v) for v in date_processing]
     date_out = datetime.datetime(*date_processing)
     return str(date_out)
+
