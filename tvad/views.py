@@ -5,8 +5,11 @@ from django.contrib import messages
 from .models import Customer, Status, Advertisement, Broadcast, Rating
 from django.shortcuts import get_object_or_404
 from django.db.models import Avg, Max, Min
+from django.db.models import Q
 import datetime
 import getpass
+import random
+
 
 def index(request):
     return render(request, 'index.html', {
@@ -42,51 +45,52 @@ def create_customer(request):
                                         Customer.objects.create(
                                             name=name,
                                             contract_number=number,
+                                            bank_details=bank_details,
                                             contact_person=contact_person,
                                             telephone=telephone,
                                             money=money,
                                         )
                                         print('Клиент успешно добавлен+')
                                         messages.error(request, 'Клиент успешно добавлен', extra_tags='saveCU')
-                                        return redirect('calculation')
+                                        return redirect('customer')
                                     else:
                                         print('Не удалось добавить информацию. Неверный формат записи суммы. Сумма должна быть больше нуля')
                                         messages.error(request,
                                                        'Не удалось добавить информацию. Неверный формат записи суммы',
                                                        extra_tags='saveCU')
-                                        return redirect('calculation')
+                                        return redirect('customer')
                                 else:
                                     print('Не удалось добавить информацию. Неверный формат записи суммы')
                                     messages.error(request, 'Не удалось добавить информацию. Неверный формат записи суммы',
                                                    extra_tags='saveCU')
-                                    return redirect('calculation')
+                                    return redirect('customer')
                             else:
                                 print('Не удалось добавить информацию. Неверный формат записи реквизитов')
                                 messages.error(request, 'Не удалось добавить информацию. Неверный формат записи реквизитов',
                                                extra_tags='saveCU')
-                                return redirect('calculation')
+                                return redirect('customer')
                         else:
                             print('Клиент c таким номером телефона уже существует+')
                             messages.error(request, 'Клиент c таким номером телефона уже существует', extra_tags='saveCU')
-                            return redirect('calculation')
+                            return redirect('customer')
                     else:
                         print('Клиент c таким именем уже существует+')
                         messages.error(request, 'Клиент c таким именем уже существует', extra_tags='saveCU')
-                        return redirect('calculation')
+                        return redirect('customer')
                 else:
                     print('Не удалось добавить информацию. Неверный формат номера+')
                     messages.error(request, 'Не удалось добавить информацию. Неверный формат номера', extra_tags='saveCU')
-                    return redirect('calculation')
+                    return redirect('customer')
             else:
                 print('Не удалось добавить информацию. Неверный формат записи телефона+')
                 messages.error(request, 'Не удалось добавить информацию. Неверный формат записи телефона',
                                extra_tags='saveCU')
-                return redirect('calculation')
+                return redirect('customer')
         else:
             print(1)
-            return redirect('calculation')
+            return redirect('customer')
     else:
-        return redirect('calculation')
+        return redirect('customer')
 
 
 def customer(request):
@@ -159,53 +163,53 @@ def create_advertisement(request):
 
                                                 )
                                                 print('Реклама успешно добавлена+')
-                                                messages.error(request, 'Реклама успешно добавлена', extra_tags='saveCU')
-                                                return redirect('calculation')
+                                                messages.error(request, 'Реклама успешно добавлена', extra_tags='saveAD')
+                                                return redirect('advertisement')
                                             else:
                                                 print('Реклама c таким описанием уже существует+')
-                                                messages.error(request, 'Реклама c таким описанием уже существует', extra_tags='saveCU')
-                                                return redirect('calculation')
+                                                messages.error(request, 'Реклама c таким описанием уже существует', extra_tags='saveAD')
+                                                return redirect('advertisement')
                                         else:
                                             print('Реклама c таким названием уже существует')
                                             messages.error(request,
                                                            'Реклама c таким названием уже существует',
-                                                           extra_tags='saveCU')
-                                            return redirect('calculation')
+                                                           extra_tags='saveAD')
+                                            return redirect('advertisement')
                                     else:
                                         print('Не удалось добавить информацию. Неверный формат стоимости')
                                         messages.error(request, 'Не удалось добавить информацию. Неверный формат стоимости',
-                                                       extra_tags='saveCU')
-                                        return redirect('calculation')
+                                                       extra_tags='saveAD')
+                                        return redirect('advertisement')
                                 else:
                                     print('Не удалось добавить информацию. Неверный формат стоимости')
                                     messages.error(request, 'Не удалось добавить информацию. Неверный формат стоимости',
-                                                   extra_tags='saveCU')
-                                    return redirect('calculation')
+                                                   extra_tags='saveAD')
+                                    return redirect('advertisement')
                             else:
                                 print('Не удалось добавить информацию. Неверный формат количества повторов')
                                 messages.error(request, 'Не удалось добавить информацию. Неверный формат количества повторов',
-                                               extra_tags='saveCU')
-                                return redirect('calculation')
+                                               extra_tags='saveAD')
+                                return redirect('advertisement')
                         else:
                             print('Не удалось добавить информацию. Неверный формат количества повторов')
-                            messages.error(request, 'Не удалось добавить информацию. Неверный формат количества повторов', extra_tags='saveCU')
-                            return redirect('calculation')
+                            messages.error(request, 'Не удалось добавить информацию. Неверный формат количества повторов', extra_tags='saveAD')
+                            return redirect('advertisement')
                     else:
                         print('Дни недели не по порядку+')
-                        messages.error(request, 'Дни недели не по порядку', extra_tags='saveCU')
-                        return redirect('calculation')
+                        messages.error(request, 'Дни недели не по порядку', extra_tags='saveAD')
+                        return redirect('advertisement')
                 else:
                     print('Не удалось добавить информацию. Неверный формат записи дней недели+')
-                    messages.error(request, 'Не удалось добавить информацию. Неверный формат записи дней недели', extra_tags='saveCU')
-                    return redirect('calculation')
+                    messages.error(request, 'Не удалось добавить информацию. Неверный формат записи дней недели', extra_tags='saveAD')
+                    return redirect('advertisement')
             else:
                 print('Не удалось добавить информацию. Неверный формат записи продолжительности рекламы+')
-                messages.error(request, 'Не удалось добавить информацию. Неверный формат записи продолжительности рекламы', extra_tags='saveCU')
-                return redirect('calculation')
+                messages.error(request, 'Не удалось добавить информацию. Неверный формат записи продолжительности рекламы', extra_tags='saveAD')
+                return redirect('advertisement')
         else:
-            return redirect('calculation')
+            return redirect('advertisement')
     else:
-        return redirect('calculation')
+        return redirect('advertisement')
 
 
 def advertisement(request):
@@ -358,12 +362,15 @@ def create_rating(request):
                     costs = Customer.objects.get(id=int(duration_customer))
                     costs.money -= cost
                     costs.save()
-                    f = open('c:/users/' + getpass.getuser() + '/Desktop/rating_.doc', 'w')
+                    f = open('c:/users/' + getpass.getuser() + '/Desktop/'+str('Расчётная счёт-квитанция')+'.doc', 'w')
                     f.write(
-                        'Расчетная Счёт-квитанция на оплату услуг телекомпании' + '\n' + '\n' + 'Название передачи: ' + broadcast_name + '\n' +
-                        'Название рекламы: ' '\n' + 'Время рекламы (сек): ' + str(
-                            duration) + '\n' + 'Заказчик: ' + '\n' + 'Время передачи (мин): ' + str(
-                            time_broadcast) + '\n' + 'Рейтинг (последней передачи): ' + str(rating) +
+                        'Расчетная Счёт-квитанция на оплату услуг телекомпании' + '\n' +
+                        '\n' + 'Название передачи: ' + broadcast_name + '\n' +
+                        'Название рекламы: '+ str(duration_name) + '\n' +
+                        'Время рекламы (сек): ' + str(duration) + '\n' +
+                        'Заказчик: ' + str(duration_customer_name) + '\n' +
+                        'Время передачи (мин): ' + str(time_broadcast) + '\n' +
+                        'Рейтинг: ' + str(rating) +
                         '\n' + 'Стоимость за 1 передачу: ' + str(cost_1) +
                         '\n' + 'Расчёт: ' + str(
                             float(rating)) + '*' + str(cost_1) + '*' + str(
@@ -392,43 +399,63 @@ def rating(request):
     })
 
 
+def search_cal(request):
+    if request.GET.keys():
+        search = request.GET.get('searchF')
+        if search != '':
+            keyword = str(request.GET.get('searchF')).strip()
+            print(keyword)
+            nn = Broadcast.objects.filter(Q(name__icontains=keyword) | Q(name__startswith=keyword) | Q(name__contains=keyword))
+            if nn:
+                print('1233')
+                ss = Broadcast.objects.filter(Q(name__icontains=keyword) | Q(name__startswith=keyword) | Q(name__contains=keyword)).first()
+                ss = ss.id
+                print(ss)
+                request.session['id_broadcast'] = str(ss)
+                return redirect('calculation')
+            else:
+                print('01')
+                print('Такой передачи нет')
+                messages.error(request,
+                               'Такой передачи нет',
+                               extra_tags='saveCU_с')
+                return redirect('calculation')
+        else:
+            return redirect('calculation')
+    else:
+        return redirect('calculation')
+
+
 def calculate_cost(request):
     if request.method == 'POST':
-        duration = request.POST['duration']
-        print('Время рекламы', duration)
-        selected_broadcast = request.POST['selected_broadcast']
-        print('Передача', selected_broadcast)
-        number_repetitions = request.POST['number_repetitions']
-        print('количество повторов', number_repetitions)
-        cost_1 = request.POST['cost']
-        print('стоимость', cost_1)
-        # print(selected_broadcast.charAt(selected_broadcast[0].length()-1))
-        # exit()
-        if (duration != '') & (selected_broadcast != '') & (number_repetitions != '') & (cost_1 != ''):
-            if (selected_broadcast[-1]) == "d":
-                print(len(selected_broadcast))
-                Str = selected_broadcast
-                l = len(Str)
-                selected_broadcast = Str[:l-1]
-                print(selected_broadcast)
-                name = Broadcast.objects.get(id=selected_broadcast).name
-                print(name)
-                time_broadcast = Broadcast.objects.get(name=name).duration
-                print('время передачи', time_broadcast)
-                print(111)
-                if duration.isnumeric():
-                    if (int(duration) != 0) & (int(duration) > 0):
-                        if number_repetitions.isnumeric():
-                            if (int(number_repetitions) != 0) & (int(number_repetitions) > 0):
-                                if cost_1.isnumeric():
-                                    print(111)
-                                    if (int(cost_1) != 0) & (int(cost_1) > 0):
-                                        col = Rating.objects.filter(broadcast=selected_broadcast).count()
-                                        print('количество записей:', col)
-                                        rating_id = Rating.objects.filter(broadcast=selected_broadcast).all()
-                                        print('записи с такой передачей', rating_id)
-                                        rating_0 = Rating.objects.filter(broadcast=selected_broadcast).last()
-                                        print('рейтинг первый', rating_0)
+        if (request.POST['duration'] != '') & (request.POST['number_repetitions'] != '') & (request.POST['cost'] != ''):
+            duration = request.POST['duration']
+            print('Время рекламы', duration)
+            number_repetitions = request.POST['number_repetitions']
+            print('количество повторов', number_repetitions)
+            cost_1 = request.POST['cost']
+            print('стоимость', cost_1)
+            id_broadcast = request.session.get('id_broadcast')
+            print(id_broadcast)
+            name = Broadcast.objects.get(id=id_broadcast).name
+            print(name)
+            time_broadcast = Broadcast.objects.get(name=name).duration
+            print('время передачи', time_broadcast)
+            print(111)
+            if duration.isnumeric():
+                if (int(duration) != 0) & (int(duration) > 0):
+                    if number_repetitions.isnumeric():
+                        if (int(number_repetitions) != 0) & (int(number_repetitions) > 0):
+                            if cost_1.isnumeric():
+                                print(111)
+                                if (int(cost_1) != 0) & (int(cost_1) > 0):
+                                    col = Rating.objects.filter(broadcast=id_broadcast).count()
+                                    print('количество записей:', col)
+                                    rating_id = Rating.objects.filter(broadcast=id_broadcast).all()
+                                    print('записи с такой передачей', rating_id)
+                                    rating_0 = Rating.objects.filter(broadcast=id_broadcast).last()
+                                    print('рейтинг первый', rating_0)
+                                    if rating_0 != None:
                                         # rating_00 = Rating.objects.filter(broadcast=selected_broadcast).aggregate(Avg('rating'))
                                         # print('рейтинг средний', rating_00)
                                         rating_0.id
@@ -436,11 +463,7 @@ def calculate_cost(request):
                                         print('показатель рейтинга', rating_ind)
                                         cost = float(rating_ind) * float(cost_1) * float(number_repetitions)
                                         print(00, cost)
-                                        # внесение данных о заработанных средствах
-                                        # costs = Customer.objects.get(id=int(duration_customer))
-                                        # costs.money -= cost
-                                        # costs.save()
-                                        f = open('c:/users/' + getpass.getuser() + '/Desktop/rating_cost.doc', 'w')
+                                        f = open('c:/users/' + getpass.getuser() + '/Desktop/'+name+''+str(duration)+'.doc', 'w')
                                         f.write(
                                             'Расчетная Счёт-квитанция на оплату услуг телекомпании' + '\n' + '\n' + 'Название передачи: ' + name + '\n' + 'Время рекламы (сек): ' + str(
                                                 duration) + '\n' + 'Время передачи (мин): ' + str(
@@ -450,60 +473,77 @@ def calculate_cost(request):
                                                 float(rating_ind)) + '*' + str(cost_1) + '*' + str(number_repetitions) + '\n' + 'Стоимость (руб): ' +
                                             str(cost) + '\n''\n' + 'Специалист по рейтингу          Ульянов Н.А.')
                                         f.close()
-                                        #название программы
-                                        request.session['name_broadcast'] = name
-                                        #время рекламы
-                                        request.session['time_adv'] = duration
-                                        #время передачи
-                                        request.session['time_br'] = str(time_broadcast)
-                                        #количество повторов
-                                        request.session['number_repetitions'] = number_repetitions
-                                        # рейтинг последней передачи
-                                        request.session['rating'] = str(rating_ind)
-                                        # стоимость одной передачи
-                                        request.session['cost'] = cost_1
-                                        #итоговая стоимость рекламы за 1 передачу
-                                        request.session['cost_end'] = cost
-                                        return redirect('calculation')
-                                        print('Расчёт добавлен')
-                                        messages.error(request,
-                                                   'Расчёт добавлен',
-                                                   extra_tags='saveCU_с')
-                                        return redirect('calculation')
                                     else:
-                                        print('Не удалось добавить информацию. Стоимость не является положительной')
-                                        messages.error(request,
-                                            'Не удалось добавить информацию. Стоимость не является положительной',
-                                                extra_tags='saveCU_с')
-                                        return redirect('calculation')
+                                        #случайный рейтинг
+                                        rating_0 = Rating.objects.order_by("?").first()
+                                        print('рейтинг первый', rating_0)
+                                        rating_0.id
+                                        rating_ind = Rating.objects.get(id=rating_0.id).rating
+                                        print('показатель рейтинга', rating_ind)
+                                        cost = float(rating_ind) * float(cost_1) * float(number_repetitions)
+                                        print(00, cost)
+                                        f = open('c:/users/' + getpass.getuser() + '/Desktop/'+name+''+str(duration)+'.doc', 'w')
+                                        f.write(
+                                            'Расчетная Счёт-квитанция на оплату услуг телекомпании' + '\n' + '\n' + 'Название передачи: ' + name + '\n' + 'Время рекламы (сек): ' + str(
+                                                duration) + '\n' + 'Время передачи (мин): ' + str(
+                                                time_broadcast) + '\n' + 'Рейтинг (последней передачи): ' + str(
+                                                rating_ind) +
+                                            '\n' + 'Стоимость за 1 передачу: ' + str(cost_1) +
+                                            '\n' + 'Расчёт: ' + str(
+                                                float(rating_ind)) + '*' + str(cost_1) + '*' + str(
+                                                number_repetitions) + '\n' + 'Стоимость (руб): ' +
+                                            str(cost) + '\n''\n' + 'Специалист по рейтингу          Ульянов Н.А.')
+                                        f.close()
+                                    #название программы
+                                    request.session['name_broadcast'] = name
+                                    #время рекламы
+                                    request.session['time_adv'] = duration
+                                    #время передачи
+                                    request.session['time_br'] = str(time_broadcast)
+                                    #количество повторов
+                                    request.session['number_repetitions'] = number_repetitions
+                                    # рейтинг последней передачи
+                                    request.session['rating'] = str(rating_ind)
+                                    # стоимость одной передачи
+                                    request.session['cost'] = cost_1
+                                    #итоговая стоимость рекламы за 1 передачу
+                                    request.session['cost_end'] = str(cost)
+                                    return redirect('calculation')
+                                    print('Расчёт добавлен')
+                                    messages.error(request,
+                                               'Расчёт добавлен',
+                                               extra_tags='saveCU_с')
+                                    return redirect('calculation')
                                 else:
-                                    print('Не удалось добавить информацию. Неверный формат стоимости')
-                                    messages.error(request, 'Не удалось добавить информацию. Неверный формат стоимости',
-                                                   extra_tags='saveCU_с')
+                                    print('Не удалось добавить информацию. Стоимость не является положительной')
+                                    messages.error(request,
+                                        'Не удалось добавить информацию. Стоимость не является положительной',
+                                            extra_tags='saveCU_с')
                                     return redirect('calculation')
                             else:
-                                print('Не удалось добавить информацию. Количество повторов не является положительным')
-                                messages.error(request,
-                                               'Не удалось добавить информацию. Количество повторов не является положительным',
+                                print('Не удалось добавить информацию. Неверный формат стоимости')
+                                messages.error(request, 'Не удалось добавить информацию. Неверный формат стоимости',
                                                extra_tags='saveCU_с')
                                 return redirect('calculation')
                         else:
-                            print('Не удалось добавить информацию. Неверный формат количества повторов')
-                            messages.error(request, 'Не удалось добавить информацию. Неверный формат количества повторов',
+                            print('Не удалось добавить информацию. Количество повторов не является положительным')
+                            messages.error(request,
+                                           'Не удалось добавить информацию. Количество повторов не является положительным',
                                            extra_tags='saveCU_с')
                             return redirect('calculation')
                     else:
-                        print('Не удалось добавить информацию. Время рекламы не является положительным')
-                        messages.error(request,
-                                       'Не удалось добавить информацию. Время рекламы не является положительным',
+                        print('Не удалось добавить информацию. Неверный формат количества повторов')
+                        messages.error(request, 'Не удалось добавить информацию. Неверный формат количества повторов',
                                        extra_tags='saveCU_с')
                         return redirect('calculation')
                 else:
-                    messages.error(request, 'Не удалось добавить информацию. Неверный формат времени рекламы',
+                    print('Не удалось добавить информацию. Время рекламы не является положительным')
+                    messages.error(request,
+                                   'Не удалось добавить информацию. Время рекламы не является положительным',
                                    extra_tags='saveCU_с')
                     return redirect('calculation')
             else:
-                messages.error(request, 'Не удалось добавить информацию. Выбрана не 2 копия передачи',
+                messages.error(request, 'Не удалось добавить информацию. Неверный формат времени рекламы',
                                extra_tags='saveCU_с')
                 return redirect('calculation')
         else:
@@ -527,7 +567,10 @@ def calculation(request):
     rating = request.session.get('rating')
     cost = request.session.get('cost')
     cost_end = request.session.get('cost_end')
-    if(name_broadcast != '') & (time_adv != '') & (time_br != '') & (number_repetitions != '') & (rating != '') & (cost != '') & (cost_end != ''):
+    id_broadcast = request.session.get('id_broadcast')
+    id_broadcast_1 = Broadcast.objects.filter(id=id_broadcast).all()
+    if(name_broadcast != '') & (time_adv != '') & (time_br != '') & (number_repetitions != '') & (rating != '') & (cost != '') & (cost_end != '') & (id_broadcast != ''):
+        request.session['name_broadcast'] = name_broadcast
         return render(request, 'calculation.html', {
             'title': 'Расчёт',
             'customer_all': customer_all,
@@ -540,6 +583,7 @@ def calculation(request):
             'rating': rating,
             'cost': cost,
             'cost_end': cost_end,
+            'id_broadcast': id_broadcast_1,
         })
     else:
         return render(request, 'calculation.html', {
